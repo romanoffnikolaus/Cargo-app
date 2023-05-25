@@ -8,10 +8,8 @@ services:
     env_file:
       - .env
     volumes: 
-      - ./database_volume:/var/lib/postgresql/data
-
-
-
+      - database_volume:/var/lib/postgresql/data
+      
   main_api:
     build:
       dockerfile: Dockerfile
@@ -60,35 +58,8 @@ services:
       - redis
       - main_api
       - celery-beat
-  
-  nginx:
-    build: 
-      dockerfile: Dockerfile
-      context: ./docker/nginx
-    container_name: nginx
-    image: nginx
-    volumes:
-      - static_volume:/application/static
-    depends_on:
-      - main_api
-    ports:
-      - "80:80"
-    restart: always
-  
 
 
 volumes: 
   static_volume:
   database_volume:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./database_volume
-
-
-
-
-
-    
-  
