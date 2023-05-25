@@ -2,7 +2,7 @@ from rest_framework import serializers
 from geopy.distance import great_circle as GC
 
 from .models import Cargo, Location, Car
-from .add_utils.miles_calculation import calculation
+from .add_utils.miles_calculation import calculation, filter_distanse
 
 
 class CargoSerilaizer(serializers.ModelSerializer):
@@ -35,7 +35,10 @@ class CargoListSerialiser(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representatioin = super().to_representation(instance)
-        representatioin['Cars'] = CarSerializer(calculation(instance), many = True).data
+        max_distance = self.context.get('max_distance')
+        representatioin['Машины на расстоянии менее 450 миль от груза'] = CarSerializer(calculation(instance), many = True).data
+        if max_distance:
+            representatioin[f'Машины на указанном расстоянии {max_distance}'] = CarSerializer(filter_distanse(instance, max_distance), many = True).data
         return representatioin
     
     
@@ -48,10 +51,10 @@ class CargoDetailSerializer(serializers.ModelSerializer):
 
     def get_cars(self, instance):
         cars_data = self.context['cars']
-        return [
-            {
-                'car': car_data['car'],
-                'distance': car_data['distance']
-            }
-            for car_data in cars_data
-        ]
+        return [{'car': car_data['car'],'distance': car_data['distance']} for car_data in cars_data]
+
+
+class CargoListFilterSerialiser(serializers.ModelSerializer):
+    class Meta:
+        model = Cargo
+        fields = '__all__'

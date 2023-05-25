@@ -25,3 +25,13 @@ def retrieve_calculation(instance, pick_up):
         distance = GC(pick_up_coordinate, car_coordinate).miles
         selected_cars.append({'car': car.unic_number,'distance': distance})
     return selected_cars
+
+def filter_distanse(instance, max_distance):
+    pick_up_coordinate = (instance.pick_up.latitude, instance.pick_up.longitude)
+    selected_cars = Car.objects.all().select_related('current_location')
+    filtered_cars = [
+        car
+        for car in selected_cars
+        if GC(pick_up_coordinate, (car.current_location.latitude, car.current_location.longitude)).miles <= max_distance
+    ]
+    return filtered_cars
