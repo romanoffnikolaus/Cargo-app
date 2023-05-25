@@ -1,0 +1,94 @@
+version: '3.3'
+
+services:
+  
+  db:
+    image: postgres:14.7
+    container_name: db
+    env_file:
+      - .env
+    volumes: 
+      - ./database_volume:/var/lib/postgresql/data
+
+
+
+  main_api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: main_api
+    volumes:
+      - static_volume:/application/static
+    command: >
+          sh -c "python manage.py collectstatic --noinput &&
+                 python manage.py migrate &&
+                 gunicorn --bind 0.0.0.0:8000 core.wsgi"
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    depends_on: 
+      - db
+    
+  redis:
+    image: redis:alpine
+    hostname: redis
+
+  celery-beat:
+    build: 
+      context: .
+    command: celery -A core beat -l info
+    volumes:
+      - .:/application
+    depends_on:
+      - db
+      - redis
+      - main_api
+
+  celery:
+    build: 
+      context: .
+    env_file:
+      - .env
+    command: celery -A core worker -l info
+    volumes:
+      - .:/application
+    links:
+      - redis
+    depends_on:
+      - db
+      - redis
+      - main_api
+      - celery-beat
+  
+  nginx:
+    build: 
+      dockerfile: Dockerfile
+      context: ./docker/nginx
+    container_name: nginx
+    image: nginx
+    volumes:
+      - static_volume:/application/static
+    depends_on:
+      - main_api
+    ports:
+      - "80:80"
+    restart: always
+  
+
+
+volumes: 
+  static_volume:
+  database_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database_volume
+
+
+
+
+
+    
+  

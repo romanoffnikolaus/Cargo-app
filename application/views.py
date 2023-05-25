@@ -5,7 +5,8 @@ import django_filters
 from rest_framework import filters
 
 from . import serializers, models
-from .add_utils.miles_calculation import retrieve_calculation, filter_distanse
+from .add_utils.miles_calculation import retrieve_calculation
+
 
 
 class CargoViewSet(ModelViewSet):
@@ -16,22 +17,20 @@ class CargoViewSet(ModelViewSet):
         filters.OrderingFilter]
     filterset_fields = ['weight',]
     ordering_fields = ['weight',]
-    lookup_field = 'id'
-
+    
 
     @swagger_auto_schema(tags=['Просмотр грузов и машин на расстоянии не более 450 миль'])
     def list(self, request, *args, **kwargs):
         max_distance = self.request.query_params.get('max_distance')
-        print(max_distance)
         if max_distance:
-            queryset = self.filter_queryset(self.get_queryset())
+            queryset = self.get_queryset()
             serializer = serializers.CargoListSerialiser(queryset, many=True, context={'max_distance': float(max_distance)})
             return Response(serializer.data)
         else:
             self.serializer_class = serializers.CargoListSerialiser
         return super().list(request, *args, **kwargs)
     
-    @swagger_auto_schema(tags=['Просмотр груза и машин с расстоянием до точки груза'])
+    @swagger_auto_schema(tags=['Просмотр груза и машин с расстоянием до точки груза + фильтр'])
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         pick_up = instance.pick_up
