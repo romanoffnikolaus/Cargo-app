@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-r24-8qvwuc)sy5!$!r)_rd%!0*qqp431i-x3@3ia9e#yt0^x%3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0']
 
 
 # Application definition
@@ -115,7 +115,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+# static
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -134,4 +136,18 @@ INTERNAL_IPS = [
 #rest-framework settings
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
+
+# celery settings
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/1"
+
+CELERY_BEAT_SCHEDULE = {
+      'add-every-30-seconds': {
+        'task': 'application.tasks.setup_periodic_tasks',
+        'schedule': 30.0,
+        'options': {
+            'expires': 15.0,
+        },
+    },
 }
