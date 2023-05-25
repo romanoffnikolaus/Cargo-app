@@ -5,9 +5,12 @@ ENV PYTHONUNBUFFERED 1
 
 RUN pip install --upgrade pip
 
-COPY . /application
 WORKDIR /application
 
-RUN mkdir /application/static
+COPY requirements.txt .
 
 RUN pip install -r requirements.txt
+
+COPY . /application
+
+RUN mkdir /application/static
