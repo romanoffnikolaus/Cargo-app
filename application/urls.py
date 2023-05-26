@@ -8,5 +8,6 @@ router = DefaultRouter()
 router.register('cargo', views.CargoViewSet)
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('cars/<str:pk>/', views.CarViewUpdate.as_view(), name='car-detail'),
 ]

@@ -2,7 +2,8 @@ from rest_framework import serializers
 from geopy.distance import great_circle as GC
 
 from .models import Cargo, Location, Car
-from .add_utils.miles_calculation import calculation, filter_distanse
+# from .add_utils.miles_calculation import calculation, filter_distance, retrieve_calculation
+from .add_utils.miles_calculation import distance_calculator
 
 
 class CargoSerilaizer(serializers.ModelSerializer):
@@ -11,7 +12,7 @@ class CargoSerilaizer(serializers.ModelSerializer):
 
     class Meta:
         model = Cargo
-        fields = ['id', 'pick_up', 'delivery', 'pick_up_zip', 'delivery_zip', 'weight', 'description', ]
+        fields = ['id', 'pick_up', 'delivery', 'pick_up_zip', 'delivery_zip', 'weight', 'description', 'active']
 
     def create(self, validated_data):
         pick_up_zip = validated_data.pop('pick_up_zip')
@@ -36,9 +37,9 @@ class CargoListSerialiser(serializers.ModelSerializer):
     def to_representation(self, instance):
         representatioin = super().to_representation(instance)
         max_distance = self.context.get('max_distance')
-        representatioin['Машины на расстоянии менее 450 миль от груза'] = CarSerializer(calculation(instance), many = True).data
+        representatioin['Машины на расстоянии менее 450 миль от груза'] = CarSerializer(distance_calculator.calculation(instance), many = True).data
         if max_distance:
-            representatioin[f'Машины на указанном расстоянии {max_distance}'] = CarSerializer(filter_distanse(instance, max_distance), many = True).data
+            representatioin[f'Машины на указанном расстоянии {max_distance}'] = CarSerializer(distance_calculator.filter_distance(instance, max_distance), many = True).data
         return representatioin
     
     
@@ -50,8 +51,9 @@ class CargoDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_cars(self, instance):
-        cars_data = self.context['cars']
-        return [{'car': car_data['car'],'distance': car_data['distance']} for car_data in cars_data]
+        pick_up = instance.pick_up
+        cars = distance_calculator.retrieve_calculation(instance, pick_up)
+        return [{'unic_number': car['car'], 'distance': car['distance']} for car in cars]
 
 
 class CargoListFilterSerialiser(serializers.ModelSerializer):

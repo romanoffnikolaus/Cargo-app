@@ -1,13 +1,18 @@
 import csv
+import time
 
 from application.models import Location
 
 
 def import_csv_to_database(csv_file_path):
+    start_time = time.time()
     with open(csv_file_path, 'r') as file:
         reader = csv.DictReader(file)
         existing_zip_codes = Location.objects.values_list('zip_code', flat=True)
         print('Проверка данных из csv файла...')
+        
+        new_locations = []
+        
         for row in reader:
             zip_code = row['zip']
             if not int(zip_code) in list(existing_zip_codes):
@@ -31,10 +36,10 @@ def import_csv_to_database(csv_file_path):
                     military=True if row['military'].lower() == 'true' else False,
                     timezone=row['timezone'],
                 )
-                location.save()
-            
+                new_locations.append(location)
 
-
-
-
+        Location.objects.bulk_create(new_locations)
+    end_time = time.time()
+    total_time = end_time - start_time
+    print(f"Время выполнения import_csv_to_database: {total_time} секунд")
 
