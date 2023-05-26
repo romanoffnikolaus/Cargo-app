@@ -22,9 +22,14 @@ Content
 
 1. Создать .env (в env_template есть шаблон)
 
-2. Install Docker + Docker-compose
+2. Установить Docker +docker-compose
 
-3. Run project
+3. запуск проекта
 ```bash
-sudo docker-compose up
+sudo docker-compose up -d
+```
+4. Создание админа и 20 дефолтных ТС
+```bash
+sudo docker exec -it main_api sh -c "python manage.py createsuperuser && python manage.py create_cars"
+
 ```
