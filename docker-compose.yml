@@ -9,7 +9,6 @@ services:
       - .env
     volumes: 
       - database_volume:/var/lib/postgresql/data
-      - ./database_backup:/database_backup
 
   main_api:
     build:

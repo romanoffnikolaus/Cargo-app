@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-r24-8qvwuc)sy5!$!r)_rd%!0*qqp431i-x3@3ia9e#yt0^x%3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0']
+ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
 
 
 # Application definition
@@ -129,7 +129,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 INTERNAL_IPS = [
     # ...
     "127.0.0.1",
-    ''
+    '0.0.0.0'
     # ...
 ]
 
@@ -139,13 +139,12 @@ REST_FRAMEWORK = {
 }
 
 # celery settings
-CELERY_BROKER_URL = "redis://redis:6379/0"
-CELERY_RESULT_BACKEND = "redis://redis:6379/1"
-
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/1"
 CELERY_BEAT_SCHEDULE = {
       'add-every-30-seconds': {
         'task': 'application.tasks.setup_periodic_tasks',
-        'schedule': 30.0,
+        'schedule': 360.0,
         'options': {
             'expires': 15.0,
         },

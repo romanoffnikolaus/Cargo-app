@@ -10,7 +10,7 @@ class CargoAdmin(admin.ModelAdmin):
     list_display = ('pick_up', 'delivery', 'weight', 'description')
 
 class CarAdmin(admin.ModelAdmin):
-    list_display = ('unic_number', 'current_location', 'capacity')
+    list_display = ('unic_number', 'current_location', 'latitude', 'longitude', 'capacity')
 
 
 admin.site.register(Cargo, CargoAdmin)
